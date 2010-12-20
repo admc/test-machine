@@ -1,0 +1,66 @@
+.jqwul { margin:10px;padding-left:15px }
+.jqwMeat {
+  padding-left:10px;
+  border:1px dotted #B3B3B3;
+  font-size:12px;
+  width:500px;
+  height:310px;
+  float:right;
+  line-height:normal;
+  overflow:auto;
+}
+.jqwMeat li {
+  color:black;
+}
+.jqwLangContainer {
+  width:120px;
+  margin-top:100px;
+  margin-left:16px;
+  color:#1B75BB;
+  font-size:14px;
+  border-left:0px solid #B3B3B3;
+  float:left;
+}
+.jqwNav {
+  width:100%;
+  border-bottom:1px dotted #B3B3B3;
+  padding-top:4px;
+  padding-bottom:4px;
+  padding-left:8px;
+  text-align:left;
+}
+.jqwImg {
+  position:absolute;
+  top:10px;
+  left:5px;
+  width:100px;
+  height:100px;
+}
+.jqwLink {
+  text-decoration:underline;
+  cursor:pointer;
+}
+.jqwExpandHeader {
+  cursor:pointer;
+}
+.jqwExpandArrow {
+  float:right;
+}
+.jqwExpand {
+  border-bottom: 1px solid #C1C1C1;
+}
+.jqwScreenContent {
+  font-size:12px;
+  padding:10px;
+  margin:10px;
+  margin-bottom:0px;
+  line-height:normal;
+}
+.jqwScreenContent p {
+  font-size:12px;
+}
+.jqwBlueLink {
+  text-decoration: underline;
+  color:blue;
+  cursor:pointer;
+}
