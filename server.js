@@ -8,8 +8,7 @@ var sys = require('sys');
 var soda = require('soda')
   , assert = require('assert');
 var request = require('request')
-  , jsdom = require('jsdom')
-  , sys = require('sys');
+  , jsdom = require('jsdom');
 
 var app = module.exports = express.createServer();
 
