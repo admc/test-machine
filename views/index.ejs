@@ -61,7 +61,13 @@
           
           $.post("run", {"test":JSON.stringify(page), "url":url},
              function(data) {
-               var obj = JSON.parse(data);
+               try {
+                 var obj = JSON.parse(data);
+               } catch(err){
+                 console.log(err);
+                 console.log(obj);
+                 var obj = data;
+               }
                var iframe = $("<iframe>");
                iframe.attr("id", "sauceIframe")
                iframe.attr("src", "https://saucelabs.com/jobs/"+ obj.sid)
