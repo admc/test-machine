@@ -85,6 +85,7 @@
        setTimeout(doRedirect, 10000);
     }
     
+    //connect to localhost
     window.socket = new io.Socket('localhost');
     socket.connect();
     socket.on('message', function(data) {
