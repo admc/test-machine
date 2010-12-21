@@ -31,6 +31,7 @@
       $("#url")[0].disabled = false;
       $("#url")[0].value = "";
       $("#submitButton")[0].style.display = "block";
+      $("#centerMsg").html("Enter your URL into the box, then press 'GO'.")
     }
     
     var showTest = function(page, url) {
@@ -143,6 +144,7 @@
       $("#url")[0].disabled = true;
       $("#url")[0].value = "Crunching, please wait.."
       $("#submitButton")[0].style.display = "none";
+      $("#centerMsg").html("<b>Please be patient!</b><br><br>Generating tests and launching VM's <br> can take some time...")
       window.socket.send(
         JSON.stringify(
           {task:"create", url:url}
@@ -187,7 +189,7 @@
       value="GO" 
       onclick="submitUser()">
   </div>
-  <center style="padding:20px;">Enter your URL into the box, then press 'GO'.</center>
+  <center id="centerMsg" style="padding:20px;">Enter your URL into the box, then press 'GO'.</center>
 </body>
 </html>
 
