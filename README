@@ -1,0 +1,34 @@
+Test Machine
+
+A web application that will take a URL, generate a test and run that test on Sauce OnDemand.
+
+Installation
+
+  nodejs: http://nodejs.org/#download
+
+ - npm install soda
+ - npm install jsdom
+ - npm install request
+ - npm install socket.io
+ - npm install ejs
+ - npm install htmlparser
+ - npm install express
+ 
+Configuration
+
+export SAUCE_USERNAME="your_username"
+export SAUCE_ACCESS_KEY="your_api_key"
+export TEST_MACHINE_PORT=whatever defaults to 80
+
+Use
+
+Bring up the APP in the browser, submit away.
+
+Development
+
+Please contribute back improvements!
+
+If you are running the app on a remote machine, make sure you modify the:
+window.socket = new io.Socket("localhost");
+
+to be pointed at the right place.

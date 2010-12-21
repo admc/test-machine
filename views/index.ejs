@@ -27,6 +27,7 @@
   <script>
   $(document).ready(function() {
     
+    //Enable the inputs UI
     var enableInputs = function() {
       $("#url")[0].disabled = false;
       $("#url")[0].value = "";
@@ -34,6 +35,7 @@
       $("#centerMsg").html("Enter your URL into the box, then press 'GO'.")
     }
     
+    //Generate a test div from the array
     var showTest = function(page, url) {
         var testContainer = $("<div>");
         testContainer.attr("id", "testContainer");
@@ -43,28 +45,49 @@
           var entryDiv = $("<div>");
           entryDiv.css({"border":"1px solid lightgray", "padding":"10px"});
           if (value.text) {
-            entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div><div>"+value.text+"</div>");
+            entryDiv.html("<div>"+value.method+
+              "</div> <div>"+value.value+
+              "</div><div>"+value.text+
+              "</div>");
           }
           else {
-            entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div>"); 
+            entryDiv.html("<div>"+value.method+
+              "</div> <div>"+
+              value.value+
+              "</div>"); 
           }
           testContainer.append(entryDiv);
         });
         
+        //Full screen overlay
         var full = $("<div>");
         full.attr("id", "full");
         full.addClass("overlay");
         $(document.body).append(full);
-
-        $(document.body).append(testContainer);
-        testContainer.dialog({"title": "Your "+url+" Test", width: 460, height:550, zIndex: 30, position:[0,0]});
         
+        //Test container dialog
+        $(document.body).append(testContainer);
+        testContainer.dialog({
+          "title": "Your "+url+" Test", 
+          width: 460, 
+          height:550, 
+          zIndex: 30, 
+          position:[0,0]}
+        );
+        
+        //Test run status div
         var status = $("<div>");
         status.attr("id", "status");
         $(document.body).append(status);
-        status.dialog({"title": "Test Status", width: 450, height:200, zIndex: 40});
+        status.dialog({
+          "title": "Test Status", 
+          width: 450, 
+          height:200, 
+          zIndex: 40}
+        );
     }
     
+    //Add a dialog containing the ondemand test run
     var runTest = function(obj) {
       var ifContainer = $("<div>");
       ifContainer.attr("id", "sauceContainer");
@@ -82,18 +105,22 @@
       
       ifContainer.append(iframe);
       $(document.body).append(ifContainer);
-      ifContainer.dialog({"title":"The Sauce", width: 900, height:550, zIndex: 50});
+      ifContainer.dialog({
+        "title":"The Sauce", 
+        width: 900, 
+        height:550, 
+        zIndex: 50}
+      );
       
        var doRedirect  = function() {
          $("#sauceIframe")[0].src = "https://saucelabs.com/jobs/"+ obj.sid+"/";
          $("#full").remove();
-         //testContainer.dialog('close');
        }
        setTimeout(doRedirect, 10000);
     }
     
     //connect to localhost
-    window.socket = new io.Socket("adam.no.de");
+    window.socket = new io.Socket("localhost");
     socket.connect();
     socket.on('message', function(data) {
         var obj = JSON.parse(data);
@@ -101,7 +128,11 @@
         if (obj.task == "showTest") {
           showTest(obj.page, obj.url);
           window.socket.send(
-            JSON.stringify( {task:"run", url:obj.url, page:obj.page} )
+            JSON.stringify({
+              task:"run", 
+              url:obj.url, 
+              page:obj.page
+            })
           );
         }
         if (obj.task == "showCmd") {
@@ -118,7 +149,7 @@
     });
     
     $('#url').bind('keypress', function(e) {
-      if (e.keyCode==$.ui.keyCode.ENTER) {
+      if (e.keyCode == $.ui.keyCode.ENTER) {
         submitUser();
       }
     });
@@ -146,9 +177,10 @@
       $("#submitButton")[0].style.display = "none";
       $("#centerMsg").html("<b>Please be patient!</b><br><br>Generating tests and launching VM's <br> can take some time...")
       window.socket.send(
-        JSON.stringify(
-          {task:"create", url:url}
-        )
+        JSON.stringify({
+          task:"create", 
+          url:url
+        })
       );      
     }
   </script>
