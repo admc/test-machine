@@ -8,7 +8,9 @@ var sys = require('sys');
 var soda = require('soda')
   , assert = require('assert');
 var request = require('request')
-  , jsdom = require('jsdom');
+  , jsdom = require('jsdom');  
+var http = require('http'),  
+    io = require('socket.io')
 
 var app = module.exports = express.createServer();
 
@@ -35,15 +37,11 @@ app.set('view options', {
 });
 
 // Routes
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
   res.render('index.ejs');
 });
 
-app.post('/run', function(req, res) {  
-  var test = JSON.parse(req.body.test);
-  var url = req.body.url;
-  res.writeHead(200, {"Content-Type": "text/plain"});
-  
+var runTest = function(test, url, client) {   
   var browser = soda.createSauceClient({
       'url': url
     , 'username': 'admc'
@@ -57,6 +55,12 @@ app.post('/run', function(req, res) {
   });
   
   browser.on('command', function(cmd, args){
+    if (cmd != 'getNewBrowserSession') {
+      client.send( JSON.stringify({task:"showCmd", cmd:cmd, args:args.join(', ')}) );
+    }
+    else {
+      client.send( JSON.stringify({task:"showCmd", cmd:"Establishing a connection", args:""}) );
+    }
     console.log(' \x1b[33m%s\x1b[0m: %s', cmd, args.join(', '));
   });
   
@@ -65,34 +69,31 @@ app.post('/run', function(req, res) {
     .session()
     .setTimeout(20000);
     
-    
-    for (var i=0;i<test.length;i++){
-      var obj = test[i];
-      browser.and(function(browser) {
-        //res.write(JSON.stringify({"cmd":obj.method}));
-        
-        if (obj.text){
-          browser[obj.method](obj.value.toString(), obj.text);
-        }
-        else {
-          browser[obj.method](obj.value.toString());
-        }
-      });
-    }
-    
-    browser
-      .testComplete()
-      .end(function(err){
-        console.log("done");
-        res.write(JSON.stringify({"sid":this.sid}));
-        res.end();
-      });
-});
+  client.send( JSON.stringify({task:"showCmd", cmd:"Test Started", args:""}) );
+  
+  for (var i=0;i<test.length;i++){
+    var obj = test[i];
+    browser.and(function(browser) {
+      if (obj.text){
+        browser[obj.method](obj.value.toString(), obj.text);
+      }
+      else {
+        browser[obj.method](obj.value.toString());
+      }
+    });
+  }
+  
+  browser
+    .testComplete()
+    .end(function(err){
+      client.send( JSON.stringify({task:"showCmd", cmd:"Test Done", args:"", sid:this.sid}) );
+      console.log("done");
+    });
+};
 
-app.post('/analyze', function(req, res) {
-  console.log(req.body.url);
+var createTest = function(url, client) {
   var page = [];
-  page.push({method:"open", value:req.body.url, attrib:"url"});
+  page.push({method:"open", value:url, attrib:"url"});
   page.push({method:"waitForPageToLoad", value:20000, attrib:false});
 
   var queryForTag = function(w, tag, attrib, method) {
@@ -134,11 +135,10 @@ app.post('/analyze', function(req, res) {
     });
   }
   
-  request({uri:req.body.url}, function (error, response, body) {
+  request({uri:url}, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       var window = jsdom.jsdom(body).createWindow();
       jsdom.jQueryify(window, 'http://code.jquery.com/jquery-1.4.2.min.js', function (window, jquery) {
-
         // jQuery is now loaded on the jsdom window created from 'body'
         queryForTag(window, 'title', 'innerHTML', 'verifyTitle');
         queryForTag(window, 'a:visible', 'innerHTML', 'verifyElementPresent');
@@ -148,19 +148,36 @@ app.post('/analyze', function(req, res) {
         queryForTag(window, 'h1:visible', 'innerHTML', 'verifyTextPresent');
         queryForTag(window, 'h2:visible', 'innerHTML', 'verifyTextPresent');
         queryForTag(window, 'h3:visible', 'innerHTML', 'verifyTextPresent');
-        //queryForTag(window, 'img:visible', ['title','alt', 'src']);
-
-        res.writeHead(200, {"Content-Type": "text/plain"});
-        res.write(JSON.stringify(page));
-        res.end();
-      });
+        client.send( JSON.stringify({task:"showTest", page:page, url:url}) );
+      })
     }
-  });
-});
+  })
+};
 
 // Only listen on $ node app.js
 
 if (!module.parent) {
-  app.listen(80);
+  app.listen(3000);
   console.log("Express server listening on port %d", app.address().port)
 }
+
+var io = io.listen(app)
+  , buffer = [];
+  
+io.on('connection', function(client) {
+  client.broadcast({ announcement: client.sessionId + ' connected' });
+  
+  client.on('message', function(message) {
+    var obj = JSON.parse(message);
+    if (obj.task == "create") {
+      createTest(obj.url, client);
+    }
+    if (obj.task == "run") {
+      runTest(obj.page, obj.url, client);
+    }
+  });
+
+  client.on('disconnect', function(){
+    client.broadcast({ announcement: client.sessionId + ' disconnected' });
+  });
+});

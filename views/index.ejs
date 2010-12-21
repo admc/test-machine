@@ -23,75 +23,102 @@
   </style>
   <script src="/js/jquery-1.4.4.min.js" type="text/javascript"></script>
   <script src="/js/jquery-ui-1.8.7.custom.min.js" type="text/javascript"></script>
-  <script src="js/jqwizard.js" type="text/javascript"></script>
-	<script src="js/example_jqw_layout.js" src="js/jqwizard.js"></script>
+	<script src="http://cdn.socket.io/stable/socket.io.js"></script>
+  <script>
+  $(document).ready(function() {
+    
+    var showTest = function(page, url) {
+        var testContainer = $("<div>");
+        testContainer.attr("id", "testContainer");
+        testContainer.css("overflow", "auto");
+        
+        $.each(page, function(index, value) {
+          var entryDiv = $("<div>");
+          entryDiv.css({"border":"1px solid lightgray", "padding":"10px"});
+          if (value.text) {
+            entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div><div>"+value.text+"</div>");
+          }
+          else {
+            entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div>"); 
+          }
+          testContainer.append(entryDiv);
+        });
+        
+        var full = $("<div>");
+        full.attr("id", "full");
+        full.addClass("overlay");
+        $(document.body).append(full);
+
+        $(document.body).append(testContainer);
+        testContainer.dialog({"title": "Your "+url+" Test", width: 460, height:550, zIndex: 30, position:[0,0]});
+        
+        var status = $("<div>");
+        status.attr("id", "status");
+        $(document.body).append(status);
+        status.dialog({"title": "Test Status", width: 450, height:200, zIndex: 40});
+    }
+    
+    var runTest = function(obj) {
+      var ifContainer = $("<div>");
+      ifContainer.attr("id", "sauceContainer");
+      ifContainer.css("overflow", "hidden");
+      var iframe = $("<iframe>");
+      iframe.attr("id", "sauceIframe")
+      iframe.attr("src", "https://saucelabs.com/jobs/"+ obj.sid)
+      iframe.css({
+        position:"absolute",
+        top:"00px",
+        left:"00px",
+        width:"100%",
+        height:"100%"
+      })
+      
+      ifContainer.append(iframe);
+      $(document.body).append(ifContainer);
+      ifContainer.dialog({"title":"The Sauce", width: 900, height:550, zIndex: 50});
+      
+       var doRedirect  = function() {
+         $("#sauceIframe")[0].src = "https://saucelabs.com/jobs/"+ obj.sid+"/";
+         $("#full").remove();
+         //testContainer.dialog('close');
+       }
+       setTimeout(doRedirect, 10000);
+    }
+    
+    window.socket = new io.Socket('localhost');
+    socket.connect();
+    socket.on('message', function(data) {
+        var obj = JSON.parse(data);
+        
+        if (obj.task == "showTest") {
+          showTest(obj.page, obj.url);
+          window.socket.send(
+            JSON.stringify( {task:"run", url:obj.url, page:obj.page} )
+          );
+        }
+        if (obj.task == "showCmd") {
+          $("#status").html( obj.cmd + " " + obj.args + "..." );
+          if (obj.cmd == "Test Done") {
+            runTest(obj);
+          }
+        }
+    });
+  });
+  </script>
+  
   <script type="text/javascript" charset="utf-8">
     var page = [];
     var url = null;
     
-    var submitUser = function() {  
-      $.post("analyze", {url:$("#url").attr("value")},
-        function(data) {
-          page = JSON.parse(data);
-          url = $("#url").attr("value");
-          var testContainer = $("<div>");
-          testContainer.attr("id", "testContainer");
-          testContainer.css("overflow", "auto");
-          
-          $.each(page, function(index, value) {
-            var entryDiv = $("<div>");
-            entryDiv.css({"border":"1px solid lightgray", "padding":"10px"});
-            if (value.text) {
-              entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div><div>"+value.text+"</div>");
-            }
-            else {
-              entryDiv.html("<div>"+value.method+"</div> <div>"+value.value+"</div>"); 
-            }
-            testContainer.append(entryDiv);
-          });
-          
-          var full = $("<div>");
-          full.attr("id", "full");
-          full.addClass("overlay");
-          $(document.body).append(full);
-          
-          
-          $(document.body).append(testContainer);
-          testContainer.dialog({"title": "Your "+url+" Test", width: 460, height:550, zIndex: 3999, position:[0,0]});
-          
-          $.post("run", {"test":JSON.stringify(page), "url":url},
-             function(data) {
-               try {
-                 var obj = JSON.parse(data);
-               } catch(err){
-                 console.log(err);
-                 console.log(obj);
-                 var obj = data;
-               }
-               var iframe = $("<iframe>");
-               iframe.attr("id", "sauceIframe")
-               iframe.attr("src", "https://saucelabs.com/jobs/"+ obj.sid)
-               iframe.css({
-                 position:"absolute",
-                 top:"00px",
-                 left:"00px",
-                 width:"100%",
-                 height:"100%"
-               })
-               $(document.body).append(iframe);
-                var doRedirect  = function() {
-                  $("#sauceIframe")[0].src = "https://saucelabs.com/jobs/"+ obj.sid+"/";
-                  $("#full").remove();
-                  testContainer.dialog('close');
-                }
-                setTimeout(doRedirect, 15000);
-             });
-          
-        });
+    var submitUser = function() {
+      window.socket.send(
+        JSON.stringify(
+          {task:"create", url:$("#url").attr("value")}
+        )
+      );      
     }
   </script>
   <link href="/css/dot-luv/jquery-ui-1.8.7.custom.css" rel="stylesheet" type="text/css" />
-  <link type="text/css" href="css/jqwizard.css" rel="stylesheet" />	
 	
   <style>
     html {
