@@ -7,7 +7,7 @@ Installation
   nodejs: http://nodejs.org/#download
 
  - npm install soda
- - npm install jsdom
+ - npm install jsdom@0.1.20
  - npm install request
  - npm install socket.io
  - npm install ejs
