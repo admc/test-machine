@@ -27,6 +27,12 @@
   <script>
   $(document).ready(function() {
     
+    var enableInputs = function() {
+      $("#url")[0].disabled = false;
+      $("#url")[0].value = "";
+      $("#submitButton")[0].style.display = "block";
+    }
+    
     var showTest = function(page, url) {
         var testContainer = $("<div>");
         testContainer.attr("id", "testContainer");
@@ -101,8 +107,19 @@
           $("#status").html( obj.cmd + " " + obj.args + "..." );
           if (obj.cmd == "Test Done") {
             runTest(obj);
+            enableInputs();
           }
         }
+        if (obj.task == "showError") {
+          alert(obj.error);
+          enableInputs();
+        }
+    });
+    
+    $('#url').bind('keypress', function(e) {
+      if (e.keyCode==$.ui.keyCode.ENTER) {
+        submitUser();
+      }
     });
   });
   </script>
@@ -112,9 +129,23 @@
     var url = null;
     
     var submitUser = function() {
+      function isUrl(s) {
+      	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+      	return regexp.test(s);
+      }
+      
+      var url = $("#url").attr("value");
+      if (!isUrl(url)){
+        alert("Please enter a valid URL..");
+        return;
+      }
+      
+      $("#url")[0].disabled = true;
+      $("#url")[0].value = "Crunching, please wait.."
+      $("#submitButton")[0].style.display = "none";
       window.socket.send(
         JSON.stringify(
-          {task:"create", url:$("#url").attr("value")}
+          {task:"create", url:url}
         )
       );      
     }
@@ -149,12 +180,14 @@
   <div class="header">Test Machine</div>
   <div style="height:100px"> </div>
   <div id="submitBox" align="center">
-    <input id="url" name="url" type="text" style="font-size:24px;width:300px;height:40px;" /><br><br>
-    <input style="height:50px;width:100px;font-size:25px" 
+    <input id="url" name="url" type="text" style="font-size:18px;width:300px;height:40px;" /><br><br>
+    <input style="height:50px;width:100px;font-size:25px"
+      id="submitButton"
       type="button" 
       value="GO" 
       onclick="submitUser()">
   </div>
+  <center style="padding:20px;">Enter your URL into the box, then press 'GO'.</center>
 </body>
 </html>
 

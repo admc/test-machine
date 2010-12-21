@@ -46,7 +46,7 @@ var runTest = function(test, url, client) {
       'url': url
     , 'username': 'admc'
     , 'access-key': 'a45f1897-8194-400c-81a7-2fa336a974a2'
-    , 'os': 'Windows 2003'
+    , 'os': 'Linux'
     , 'browser': 'firefox'
     , 'browser-version': '3.'
     , 'max-duration': 300 // 5 minutes
@@ -61,7 +61,7 @@ var runTest = function(test, url, client) {
     else {
       client.send( JSON.stringify({task:"showCmd", cmd:"Establishing a connection", args:""}) );
     }
-    console.log(' \x1b[33m%s\x1b[0m: %s', cmd, args.join(', '));
+    //console.log(' \x1b[33m%s\x1b[0m: %s', cmd, args.join(', '));
   });
   
   browser
@@ -87,7 +87,7 @@ var runTest = function(test, url, client) {
     .testComplete()
     .end(function(err){
       client.send( JSON.stringify({task:"showCmd", cmd:"Test Done", args:"", sid:this.sid}) );
-      console.log("done");
+      //console.log("done");
     });
 };
 
@@ -151,6 +151,9 @@ var createTest = function(url, client) {
         client.send( JSON.stringify({task:"showTest", page:page, url:url}) );
       })
     }
+    else {
+      client.send( JSON.stringify({task:"showError", error:"The provided URL was unaccessible."}) );
+    }
   })
 };
 
@@ -158,7 +161,7 @@ var createTest = function(url, client) {
 
 if (!module.parent) {
   app.listen(80);
-  console.log("Express server listening on port %d", app.address().port)
+  //console.log("Express server listening on port %d", app.address().port)
 }
 
 var io = io.listen(app)
