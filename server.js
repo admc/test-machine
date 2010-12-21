@@ -168,7 +168,7 @@ var io = io.listen(app)
   , buffer = [];
   
 io.on('connection', function(client) {
-  client.broadcast({ announcement: client.sessionId + ' connected' });
+  //client.broadcast({ announcement: client.sessionId + ' connected' });
   
   client.on('message', function(message) {
     var obj = JSON.parse(message);
@@ -180,7 +180,7 @@ io.on('connection', function(client) {
     }
   });
 
-  client.on('disconnect', function(){
-    client.broadcast({ announcement: client.sessionId + ' disconnected' });
-  });
+  // client.on('disconnect', function(){
+  //   client.broadcast({ announcement: client.sessionId + ' disconnected' });
+  // });
 });
