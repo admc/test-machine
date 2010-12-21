@@ -92,7 +92,7 @@
     }
     
     //connect to localhost
-    window.socket = new io.Socket('localhost');
+    window.socket = new io.Socket('adam.no.de');
     socket.connect();
     socket.on('message', function(data) {
         var obj = JSON.parse(data);
