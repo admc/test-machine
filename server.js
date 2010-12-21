@@ -46,7 +46,7 @@ var runTest = function(test, url, client) {
       'url': url
     , 'username': 'admc'
     , 'access-key': 'a45f1897-8194-400c-81a7-2fa336a974a2'
-    , 'os': 'Linux'
+    , 'os': 'Windows 2003'
     , 'browser': 'firefox'
     , 'browser-version': '3.'
     , 'max-duration': 300 // 5 minutes
