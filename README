@@ -16,9 +16,15 @@ Installation
  
 Configuration
 
-export SAUCE_USERNAME="your_username"
-export SAUCE_ACCESS_KEY="your_api_key"
-export TEST_MACHINE_PORT=whatever defaults to 80
+Create a ~/.tmrc file that contains a JSON data structure
+containing the three keys, like so:
+
+{
+  "SAUCE_ACCESS_KEY":"xxxxxxxx-xxxxx-xxxxxx-xxxxx",
+  "SAUCE_USERNAME":"billy",
+  "TEST_MACHINE_PORT":"3000"
+}
+
 
 Use
 

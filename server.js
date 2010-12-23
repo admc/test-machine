@@ -26,6 +26,7 @@ var request = require('request')
   , jsdom = require('jsdom');  
 var http = require('http')
   , io = require('socket.io')
+  , fs = require('fs');
 
 var app = module.exports = express.createServer();
 
@@ -56,9 +57,11 @@ app.get('/', function(req, res) {
   res.render('index.ejs');
 });
 
-var runTest = function(test, url, client) {   
+var runTest = function(test, url, client, configObj) {   
   var browser = soda.createSauceClient({
       'url': url
+    , 'username': configObj.SAUCE_USERNAME
+    , 'access-key': configObj.SAUCE_ACCESS_KEY
     , 'os': 'Linux'
     , 'browser': 'firefox'
     , 'browser-version': '3.'
@@ -213,30 +216,55 @@ var createTest = function(url, client) {
   })
 };
 
-// Listen
-if (!module.parent) {
-  app.listen(process.env.TEST_MACHINE_PORT);
-  console.log("Express server listening on port %d", app.address().port)
-}
+fs.readFile(process.env.HOME+'/.tmrc', encoding='utf8', function(err, data) {
+  if (err){
+    console.log("We weren't able to find a ~/.tmrc config file, please create.");
+    return;
+  }
+  var configObj = JSON.parse(data);
 
-var io = io.listen(app)
-  , buffer = [];
-
-//socket.io
-io.on('connection', function(client) {
-  //client.broadcast({ announcement: client.sessionId + ' connected' });
+  if (!configObj.TEST_MACHINE_PORT) {
+    console.log("Please define a TEST_MACHINE_PORT in your ~/.tmrc file.");
+    return;
+  }
   
-  client.on('message', function(message) {
-    var obj = JSON.parse(message);
-    if (obj.task == "create") {
-      createTest(obj.url, client);
-    }
-    if (obj.task == "run") {
-      runTest(obj.page, obj.url, client);
-    }
-  });
+  if (!configObj.SAUCE_USERNAME) {
+    console.log("Please define a SAUCE_USERNAME in your ~/.tmrc file.");
+    return;
+  }
+  
+  if (!configObj.SAUCE_ACCESS_KEY) {
+    console.log("Please define a SAUCE_ACCESS_KEY in your ~/.tmrc file.");
+    return;
+  }
+  
+  // Listen
+  if (!module.parent) {
+    app.listen(configObj.TEST_MACHINE_PORT);
+    console.log("Express server listening on port %d", app.address().port)
+  }
 
-  // client.on('disconnect', function(){
-  //   client.broadcast({ announcement: client.sessionId + ' disconnected' });
-  // });
+  var io = require('socket.io')
+  var io = io.listen(app)
+    , buffer = [];
+
+  //socket.io
+  io.on('connection', function(client) {
+    //client.broadcast({ announcement: client.sessionId + ' connected' });
+
+    client.on('message', function(message) {
+      var obj = JSON.parse(message);
+      if (obj.task == "create") {
+        createTest(obj.url, client);
+      }
+      if (obj.task == "run") {
+        runTest(obj.page, obj.url, client, configObj);
+      }
+    });
+
+    // client.on('disconnect', function(){
+    //   client.broadcast({ announcement: client.sessionId + ' disconnected' });
+    // });
+  });
 });
+
