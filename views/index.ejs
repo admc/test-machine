@@ -27,6 +27,34 @@
   <script>
   $(document).ready(function() {
     
+    //connect to localhost
+    window.socket = new io.Socket("localhost");
+    socket.connect();
+    socket.on('message', function(data) {
+        var obj = JSON.parse(data);
+        if (obj.task == "showTest") {
+          showTest(obj.page, obj.url);
+          window.socket.send(
+            JSON.stringify({
+              task:"run",
+              url:obj.url,
+              page:obj.page
+            })
+          );
+        }
+        if (obj.task == "showCmd") {
+          $("#status").html( obj.cmd + " " + obj.args + "..." );
+          if (obj.cmd == "Test Done") {
+            runTest(obj);
+            enableInputs();
+          }
+        }
+        if (obj.task == "showError") {
+          alert(obj.error);
+          enableInputs();
+        }
+    });
+
     //Enable the inputs UI
     var enableInputs = function() {
       $("#url")[0].disabled = false;
@@ -118,35 +146,6 @@
        }
        setTimeout(doRedirect, 10000);
     }
-    
-    //connect to localhost
-    window.socket = new io.Socket("localhost");
-    socket.connect();
-    socket.on('message', function(data) {
-        var obj = JSON.parse(data);
-        
-        if (obj.task == "showTest") {
-          showTest(obj.page, obj.url);
-          window.socket.send(
-            JSON.stringify({
-              task:"run", 
-              url:obj.url, 
-              page:obj.page
-            })
-          );
-        }
-        if (obj.task == "showCmd") {
-          $("#status").html( obj.cmd + " " + obj.args + "..." );
-          if (obj.cmd == "Test Done") {
-            runTest(obj);
-            enableInputs();
-          }
-        }
-        if (obj.task == "showError") {
-          alert(obj.error);
-          enableInputs();
-        }
-    });
     
     $('#url').bind('keypress', function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
