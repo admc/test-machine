@@ -156,7 +156,8 @@ var createTest = function(url, client) {
       }
       else { actionObj.attrib = attrib; }
       
-      if (tag == ":text:visible")  {
+      if ((tag == ":text:visible") ||
+          (tag == "textarea:visible")) {
         page.push({
           method:"type", 
           value:value[actionObj.attrib], 
@@ -191,16 +192,18 @@ var createTest = function(url, client) {
         // jQuery is now loaded on the jsdom window created from 'body'
         queryForTag(window, 'title', 'innerHTML', 'verifyTitle');
         queryForTag(window, 'a:visible', 'innerHTML', 'verifyElementPresent');
-        queryForTag(window, ':text:visible', ['id','name'], 'verifyValue');
+        queryForTag(window, 'textarea:visible', ['id','name'], 'verifyValue');
+        queryForTag(window, ':text', ['id','name'], 'verifyValue');
         queryForTag(window, ':submit:visible', ['id','name'], 'verifyElementPresent');
         queryForTag(window, ':button:visible', ['id','name'], 'verifyElementPresent');
         queryForTag(window, 'h1:visible', 'innerHTML', 'verifyTextPresent');
         queryForTag(window, 'h2:visible', 'innerHTML', 'verifyTextPresent');
         queryForTag(window, 'h3:visible', 'innerHTML', 'verifyTextPresent');
         client.send( JSON.stringify({
-          task:"showTest", 
-          page:page, 
-          url:url}) 
+            task:"showTest",
+            page:page,
+            url:url
+          })
         );
       })
     }
