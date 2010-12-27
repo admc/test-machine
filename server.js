@@ -71,19 +71,11 @@ var runTest = function(test, url, client, configObj) {
   });
   
   browser.on('command', function(cmd, args) {
-    if (cmd != 'getNewBrowserSession') {
+    if ((cmd != 'getNewBrowserSession') && (cmd != "setTimeout")) {
       client.send( JSON.stringify({
         task:"showCmd", 
         cmd:cmd, 
         args:args.join(', ')}) 
-      );
-    }
-    else {
-      client.send( JSON.stringify({
-          task:"showCmd", 
-          cmd:"Establishing a connection", 
-          args:""
-        }) 
       );
     }
     console.log(' \x1b[33m%s\x1b[0m: %s', cmd, args.join(', '));
@@ -94,12 +86,12 @@ var runTest = function(test, url, client, configObj) {
     .session()
     .setTimeout(20000);
     
-  client.send( JSON.stringify({
-      task:"showCmd", 
-      cmd:"Test Started", 
-      args:""
-    }) 
-  );
+  // client.send( JSON.stringify({
+  //     task:"showCmd", 
+  //     cmd:"Test Started", 
+  //     args:""
+  //   }) 
+  // );
   
   // Add each of the actions to soda
   for (var i=0;i<test.length;i++) {
