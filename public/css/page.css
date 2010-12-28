@@ -1,0 +1,21 @@
+html {
+  background: #1c1c1c url(/img/bg.tile.jpg); 
+}
+body {
+  margin: 0;
+  padding-bottom: 30px;
+  font: 14px/1.4 "Helvetica Neue", "Lucida Grande", "Arial";
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
+  -moz-text-stroke: 1px rgba(0, 0, 0, 0.1);
+  color: #8b8b8b; 
+}
+.header {
+  text-align:center;
+  color: rgb(221, 221, 221);
+  font: bold 50px/50px arial;
+  margin: 20px;
+  padding: 10px;
+  text-shadow: -1px -1px 0pt rgb(136, 136, 136), 1px 1px 0pt rgb(255, 255, 255);
+}
